@@ -3,17 +3,15 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { MapSkeleton } from "@/components/dashboard/loading-states";
 import { useDashboardStore } from "@/store/dashboard";
 import type { CountryNewsVolume } from "@/types";
 
-function getColor(sentiment: string, volume: number): string {
-  const base =
-    sentiment === "positive" ? [34, 197, 94] :
-    sentiment === "negative" ? [239, 68, 68] :
-    [234, 179, 8];
-  const opacity = Math.min(0.3 + (volume / 50) * 0.7, 1);
-  return `rgba(${base.join(",")}, ${opacity})`;
+function getColor(sentiment: string): string {
+  if (sentiment === "positive") return "#22c55e";
+  if (sentiment === "negative") return "#ef4444";
+  return "#eab308";
 }
 
 function MapInner({ data }: { data: CountryNewsVolume[] }) {
@@ -24,6 +22,7 @@ function MapInner({ data }: { data: CountryNewsVolume[] }) {
     CircleMarker: React.ComponentType<Record<string, unknown>>;
     Tooltip: React.ComponentType<Record<string, unknown>>;
   } | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -42,41 +41,81 @@ function MapInner({ data }: { data: CountryNewsVolume[] }) {
   const { MapContainer, TileLayer, CircleMarker, Tooltip } = mapComponents;
 
   return (
-    <MapContainer
-      center={[20, 0] as [number, number]}
-      zoom={2}
-      scrollWheelZoom={true}
-      style={{ height: "100%", width: "100%", borderRadius: "12px" }}
-      className="z-0"
-      {...{ attributionControl: false }}
-    >
-      <TileLayer
-        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-        {...{ attribution: "" }}
-      />
-      {data.map((point) => (
-        <CircleMarker
-          key={point.country_code}
-          center={[point.lat, point.lng] as [number, number]}
-          radius={Math.max(5, Math.min(point.volume * 2, 25))}
-          {...{
-            fillColor: getColor(point.dominant_sentiment, point.volume),
-            fillOpacity: 0.7,
-            stroke: true,
-            color: "rgba(255,255,255,0.2)",
-            weight: 1,
-          }}
+    <div className="relative">
+      <MapContainer
+        center={[20, 0] as [number, number]}
+        zoom={2}
+        scrollWheelZoom={true}
+        style={{ height: "100%", width: "100%", borderRadius: "12px", minHeight: "300px" }}
+        className="z-0"
+        {...{ attributionControl: false }}
+      >
+        <TileLayer
+          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          {...{ attribution: "" }}
+        />
+        {data.map((point) => {
+          const color = getColor(point.dominant_sentiment);
+          const isSelected = selectedCountry === point.country;
+          const radius = Math.max(6, Math.min(point.volume * 3, 30));
+
+          return (
+            <CircleMarker
+              key={point.country_code}
+              center={[point.lat, point.lng] as [number, number]}
+              radius={isSelected ? radius * 1.3 : radius}
+              {...{
+                fillColor: color,
+                fillOpacity: isSelected ? 0.9 : 0.5,
+                stroke: true,
+                color: color,
+                weight: isSelected ? 2 : 1,
+                opacity: isSelected ? 1 : 0.4,
+                className: "cursor-pointer transition-all",
+                eventHandlers: {
+                  click: () => setSelectedCountry(
+                    selectedCountry === point.country ? null : point.country
+                  ),
+                },
+              }}
+            >
+              <Tooltip>
+                <div className="text-xs p-1">
+                  <p className="font-semibold">{point.country}</p>
+                  <p className="text-muted-foreground">
+                    {point.volume} article{point.volume !== 1 ? "s" : ""} ·{" "}
+                    <span style={{ color }}>{point.dominant_sentiment}</span>
+                  </p>
+                </div>
+              </Tooltip>
+            </CircleMarker>
+          );
+        })}
+      </MapContainer>
+
+      {/* Selected country detail overlay */}
+      {selectedCountry && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="absolute bottom-3 left-3 z-10 glass-strong rounded-lg px-3 py-2"
         >
-          <Tooltip>
-            <div className="text-xs">
-              <strong>{point.country}</strong>
-              <br />
-              {point.volume} articles · {point.dominant_sentiment}
-            </div>
-          </Tooltip>
-        </CircleMarker>
-      ))}
-    </MapContainer>
+          {data
+            .filter((d) => d.country === selectedCountry)
+            .map((d) => (
+              <div key={d.country_code} className="text-xs">
+                <p className="font-semibold text-sm">{d.country}</p>
+                <p className="text-muted-foreground">
+                  {d.volume} articles · Sentiment:{" "}
+                  <span style={{ color: getColor(d.dominant_sentiment) }}>
+                    {d.dominant_sentiment}
+                  </span>
+                </p>
+              </div>
+            ))}
+        </motion.div>
+      )}
+    </div>
   );
 }
 
@@ -85,34 +124,39 @@ export function WorldHeatmap() {
 
   if (!analytics?.countryVolume?.length) return null;
 
+  const topCountry = analytics.countryVolume[0];
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.4 }}
+      transition={{ duration: 0.6, delay: 0.4, type: "spring" }}
       className="p-6 pt-0"
     >
-      <Card>
+      <Card className="card-interactive">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">
-            Global News Volume
+          <CardTitle className="text-sm font-medium flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              Global News Volume
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 live-dot" />
+            </span>
+            {topCountry && (
+              <Badge variant="secondary" className="text-[9px]">
+                Top: {topCountry.country} ({topCountry.volume})
+              </Badge>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-72 rounded-xl overflow-hidden">
+          <div className="rounded-xl overflow-hidden">
             <MapInner data={analytics.countryVolume} />
           </div>
-          <div className="flex justify-center gap-4 mt-3">
-            {["positive", "neutral", "negative"].map((s) => (
+          <div className="flex justify-center gap-5 mt-3">
+            {(["positive", "neutral", "negative"] as const).map((s) => (
               <div key={s} className="flex items-center gap-1.5 text-xs">
                 <div
-                  className="h-2 w-2 rounded-full"
-                  style={{
-                    background:
-                      s === "positive" ? "#22c55e" :
-                      s === "negative" ? "#ef4444" :
-                      "#eab308",
-                  }}
+                  className="h-2.5 w-2.5 rounded-full"
+                  style={{ background: getColor(s) }}
                 />
                 <span className="text-muted-foreground capitalize">{s}</span>
               </div>

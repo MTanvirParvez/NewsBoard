@@ -3,11 +3,14 @@
 import { useEffect, useCallback, useRef } from "react";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { DashboardHeader } from "@/components/dashboard/header";
+import { NewsTicker } from "@/components/dashboard/news-ticker";
 import { ArticleGrid } from "@/components/dashboard/article-grid";
 import { RightPanel } from "@/components/dashboard/right-panel";
 import { AnalyticsSection } from "@/components/charts/analytics-section";
 import { WorldHeatmap } from "@/components/map/world-heatmap";
+import { AmbientParticles } from "@/components/dashboard/ambient-particles";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ToastContainer, showToast } from "@/components/ui/toast";
 import { useDashboardStore } from "@/store/dashboard";
 import {
   SEED_ARTICLES,
@@ -37,9 +40,19 @@ export default function DashboardPage() {
         if (data.summaries) setSummaries(data.summaries);
         if (data.analytics) setAnalytics(data.analytics);
         setLastUpdated(new Date().toISOString());
+        showToast({
+          type: "update",
+          title: `${data.articles.length} live articles loaded`,
+          message: "Dashboard updated with latest global news",
+        });
       }
     } catch (err) {
       console.error("Auto-fetch error:", err);
+      showToast({
+        type: "info",
+        title: "Using sample data",
+        message: "Live feeds unavailable — showing sample articles",
+      });
     } finally {
       setIsUpdating(false);
     }
@@ -49,7 +62,7 @@ export default function DashboardPage() {
     if (hasFetched.current) return;
     hasFetched.current = true;
 
-    // 1. Try to load from localStorage cache
+    // 1. Try localStorage cache
     let hasCache = false;
     try {
       const cached = localStorage.getItem("newsboard-cache");
@@ -62,7 +75,6 @@ export default function DashboardPage() {
           if (data.lastUpdated) setLastUpdated(data.lastUpdated);
           hasCache = true;
 
-          // Refresh in background if cache > 1 hour old
           const age = Date.now() - new Date(data.lastUpdated || 0).getTime();
           if (age > 60 * 60 * 1000) {
             fetchNews();
@@ -74,19 +86,17 @@ export default function DashboardPage() {
       // ignore
     }
 
-    // 2. No cache — show seed data immediately so dashboard isn't empty
+    // 2. No cache — seed data immediately + fetch in background
     if (!hasCache) {
       setArticles(SEED_ARTICLES);
       setSummaries(generateSeedSummaries());
       setAnalytics(generateSeedAnalytics());
       setLastUpdated(new Date().toISOString());
-
-      // Then fetch real news in background (replaces seed data)
       fetchNews();
     }
   }, [setArticles, setSummaries, setAnalytics, setLastUpdated, fetchNews]);
 
-  // Persist to localStorage when data changes
+  // Persist to localStorage
   useEffect(() => {
     const unsub = useDashboardStore.subscribe((state) => {
       if (state.articles.length > 0) {
@@ -105,11 +115,20 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex h-screen overflow-hidden bg-background relative">
+      {/* Ambient animated particles */}
+      <AmbientParticles />
+
+      {/* Toast notifications */}
+      <ToastContainer />
+
+      {/* Sidebar */}
       <Sidebar />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden relative z-10">
         <DashboardHeader />
+        <NewsTicker />
 
         <ScrollArea className="flex-1">
           <div className="min-h-full">
@@ -121,6 +140,7 @@ export default function DashboardPage() {
         </ScrollArea>
       </div>
 
+      {/* Right Panel */}
       <RightPanel />
     </div>
   );
