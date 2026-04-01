@@ -1,7 +1,79 @@
 import { NextResponse } from "next/server";
+import Parser from "rss-parser";
 import type { Article, Category } from "@/types";
-import { NEWSDATA_CATEGORIES, NEWSAPI_CATEGORIES, CATEGORY_KEYWORDS } from "@/config/categories";
+import { RSS_FEEDS } from "@/config/rss-feeds";
+import { NEWSDATA_CATEGORIES, CATEGORY_KEYWORDS } from "@/config/categories";
 import { CATEGORIES } from "@/types";
+
+const rssParser = new Parser({
+  timeout: 10000,
+  headers: {
+    "User-Agent": "LuminaBoard/1.0 (News Dashboard)",
+    Accept: "application/rss+xml, application/xml, text/xml",
+  },
+});
+
+// ─── RSS Fetching (FREE — no API key) ─────────────────────────
+
+async function fetchRSSFeed(feed: { url: string; name: string; category: Category }): Promise<Article[]> {
+  try {
+    const parsed = await rssParser.parseURL(feed.url);
+
+    return (parsed.items || []).slice(0, 8).map((item) => ({
+      id: crypto.randomUUID(),
+      external_id: item.guid || item.link || crypto.randomUUID(),
+      title: item.title || "Untitled",
+      description: cleanHTML(item.contentSnippet || item.content || item.summary || null),
+      content: cleanHTML(item.content || item["content:encoded"] || null),
+      source_name: feed.name,
+      source_url: item.link || null,
+      image_url: extractImage(item),
+      published_at: item.isoDate || item.pubDate || new Date().toISOString(),
+      category: feed.category,
+      country: null,
+      language: "en",
+      keywords: item.categories?.slice(0, 5) || [],
+      sentiment_score: null,
+      created_at: new Date().toISOString(),
+    }));
+  } catch (err) {
+    console.error(`RSS fetch failed for ${feed.name} (${feed.url}):`, err);
+    return [];
+  }
+}
+
+function cleanHTML(html: string | null): string | null {
+  if (!html) return null;
+  return html
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function extractImage(item: Record<string, unknown>): string | null {
+  // Check common RSS image fields
+  if (item.enclosure && typeof item.enclosure === "object") {
+    const enc = item.enclosure as Record<string, string>;
+    if (enc.url && enc.type?.startsWith("image")) return enc.url;
+  }
+  if (typeof item["media:content"] === "object") {
+    const media = item["media:content"] as Record<string, string>;
+    if (media.url) return media.url;
+  }
+  // Try to extract from content
+  const content = (item.content || item["content:encoded"] || "") as string;
+  const imgMatch = content.match(/<img[^>]+src=["']([^"']+)["']/);
+  if (imgMatch) return imgMatch[1];
+  return null;
+}
+
+// ─── NewsData.io Fetching (optional, if key provided) ─────────
 
 interface NewsDataArticle {
   article_id: string;
@@ -16,36 +88,6 @@ interface NewsDataArticle {
   country: string[];
   language: string;
   keywords: string[] | null;
-  category: string[];
-}
-
-interface NewsAPIArticle {
-  title: string;
-  description: string | null;
-  content: string | null;
-  source: { name: string };
-  url: string;
-  urlToImage: string | null;
-  publishedAt: string;
-}
-
-function classifyArticle(title: string, description: string | null): Category {
-  const text = `${title} ${description || ""}`.toLowerCase();
-  let bestCategory: Category = "politics";
-  let bestScore = 0;
-
-  for (const cat of CATEGORIES) {
-    const keywords = CATEGORY_KEYWORDS[cat];
-    let score = 0;
-    for (const kw of keywords) {
-      if (text.includes(kw.toLowerCase())) score++;
-    }
-    if (score > bestScore) {
-      bestScore = score;
-      bestCategory = cat;
-    }
-  }
-  return bestCategory;
 }
 
 async function fetchNewsDataIO(category: Category): Promise<Article[]> {
@@ -86,80 +128,50 @@ async function fetchNewsDataIO(category: Category): Promise<Article[]> {
   }
 }
 
-async function fetchNewsAPIOrg(category: Category): Promise<Article[]> {
-  const apiKey = process.env.NEWSAPI_API_KEY;
-  if (!apiKey) return [];
-
-  try {
-    const keywords = CATEGORY_KEYWORDS[category].slice(0, 2).join(" OR ");
-    const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(keywords)}&language=en&sortBy=publishedAt&pageSize=10&apiKey=${apiKey}`;
-
-    const res = await fetch(url, { next: { revalidate: 300 } });
-    if (!res.ok) return [];
-
-    const data = await res.json();
-    if (!data.articles) return [];
-
-    return data.articles
-      .filter((a: NewsAPIArticle) => a.title && a.title !== "[Removed]")
-      .map((a: NewsAPIArticle) => ({
-        id: crypto.randomUUID(),
-        external_id: `newsapi-${Buffer.from(a.url || "").toString("base64").slice(0, 50)}`,
-        title: a.title,
-        description: a.description,
-        content: a.content,
-        source_name: a.source?.name || "Unknown",
-        source_url: a.url,
-        image_url: a.urlToImage,
-        published_at: a.publishedAt || new Date().toISOString(),
-        category: classifyArticle(a.title, a.description),
-        country: null,
-        language: "en",
-        keywords: [],
-        sentiment_score: null,
-        created_at: new Date().toISOString(),
-      }));
-  } catch (err) {
-    console.error(`NewsAPI.org error for ${category}:`, err);
-    return [];
-  }
-}
+// ─── Main Handler ─────────────────────────────────────────────
 
 export async function GET() {
   const allArticles: Article[] = [];
 
-  // Try primary source (NewsData.io) for each category
-  const primaryResults = await Promise.all(
-    CATEGORIES.map((cat) => fetchNewsDataIO(cat))
-  );
-
-  for (const articles of primaryResults) {
-    allArticles.push(...articles);
+  // Strategy 1: If NewsData.io key exists, use it as primary
+  if (process.env.NEWSDATA_API_KEY) {
+    const apiResults = await Promise.all(
+      CATEGORIES.map((cat) => fetchNewsDataIO(cat))
+    );
+    for (const articles of apiResults) {
+      allArticles.push(...articles);
+    }
   }
 
-  // If we got fewer than 10 total, try fallback (NewsAPI.org)
-  if (allArticles.length < 10) {
-    const fallbackResults = await Promise.all(
-      CATEGORIES.map((cat) => fetchNewsAPIOrg(cat))
-    );
-    for (const articles of fallbackResults) {
-      allArticles.push(...articles);
+  // Strategy 2: Always fetch RSS feeds (free, no key needed)
+  // This is the primary source when no API keys are configured
+  const rssResults = await Promise.allSettled(
+    RSS_FEEDS.map((feed) => fetchRSSFeed(feed))
+  );
+
+  for (const result of rssResults) {
+    if (result.status === "fulfilled") {
+      allArticles.push(...result.value);
     }
   }
 
   // Deduplicate by title similarity
   const seen = new Set<string>();
   const unique = allArticles.filter((a) => {
-    const key = a.title.toLowerCase().slice(0, 60);
+    const key = a.title.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 50);
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
   });
 
-  // Sort by published date
+  // Sort by published date (newest first)
   unique.sort(
     (a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
   );
 
-  return NextResponse.json({ articles: unique });
+  return NextResponse.json({
+    articles: unique.slice(0, 100), // Cap at 100 articles
+    source: process.env.NEWSDATA_API_KEY ? "api+rss" : "rss",
+    count: unique.length,
+  });
 }

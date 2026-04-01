@@ -48,9 +48,11 @@ export function ArticleGrid() {
           <Newspaper className="h-8 w-8 text-primary" />
         </div>
         <h3 className="text-lg font-semibold mb-2">No articles yet</h3>
-        <p className="text-sm text-muted-foreground max-w-sm">
-          Hit the <strong>Update Now</strong> button to fetch the latest global news
-          and generate AI-powered summaries.
+        <p className="text-sm text-muted-foreground max-w-sm mb-1">
+          Hit the <strong className="text-primary">Update Now</strong> button above to fetch the latest global news from 20+ RSS feeds (BBC, Reuters, NYT, TechCrunch…)
+        </p>
+        <p className="text-xs text-muted-foreground max-w-sm">
+          No API keys required — everything works out of the box.
         </p>
       </motion.div>
     );

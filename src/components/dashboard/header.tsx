@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { RefreshCw, Clock, Sparkles, Bell } from "lucide-react";
+import { RefreshCw, Clock, Sparkles, Bell, Rss } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useDashboardStore } from "@/store/dashboard";
@@ -44,6 +44,10 @@ export function DashboardHeader() {
         <Badge variant="neon" className="text-xs">
           <Sparkles className="h-3 w-3 mr-1" />
           AI-Powered
+        </Badge>
+        <Badge variant="success" className="text-xs">
+          <Rss className="h-3 w-3 mr-1" />
+          Free RSS
         </Badge>
         {articles.length > 0 && (
           <Badge variant="secondary" className="text-xs">

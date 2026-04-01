@@ -25,44 +25,43 @@ Real-time global coverage across **Politics**, **Economy**, **Tech & AI**, **Ind
 | Styling | Tailwind CSS v4 + custom glassmorphism |
 | UI Components | shadcn/ui (Radix) + Framer Motion |
 | Backend | Supabase (Auth, Postgres, Realtime) |
-| News Data | NewsData.io (primary) + NewsAPI.org (fallback) |
-| AI | Vercel AI SDK + Grok/OpenAI/Claude (configurable) |
+| News Data | RSS feeds (20+ sources, free) + optional NewsData.io/NewsAPI.org |
+| AI | Local engine (default, free) + optional Vercel AI SDK (Grok/OpenAI/Claude) |
 | Charts | Recharts |
 | Map | React Leaflet + CartoDB dark tiles |
 | State | Zustand |
 
-## Quick Start
+## Quick Start (Zero API Keys!)
 
 ```bash
 # 1. Install dependencies
 npm install
 
-# 2. Set up environment variables
-cp .env.local.example .env.local
-# Fill in your API keys (see below)
-
-# 3. Set up Supabase
-# Run supabase/schema.sql in your Supabase SQL editor
-
-# 4. Start development
+# 2. Start development — that's it!
 npm run dev
 ```
 
-## Environment Variables
+Open http://localhost:3000, click **Update Now**, and watch it populate with real global news from 20+ RSS feeds.
+
+### Optional Enhancements
+
+All of these are **optional** — the app is fully functional without any keys:
 
 ```env
-# Supabase (required for auth/data persistence)
+# Copy .env.local.example to .env.local and uncomment what you want:
+
+# Supabase — adds auth & cloud data persistence (free tier)
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
-# News APIs (at least one required)
-NEWSDATA_API_KEY=your-newsdata-io-key       # 200 credits/day free
-NEWSAPI_API_KEY=your-newsapi-org-key         # 100 req/day free
+# News APIs — adds more sources beyond RSS
+NEWSDATA_API_KEY=your-key      # newsdata.io (200 credits/day free)
+NEWSAPI_API_KEY=your-key       # newsapi.org (100 req/day free)
 
-# AI (at least one required for summaries/chat)
-OPENAI_API_KEY=your-openai-key               # GPT-4o-mini
-XAI_API_KEY=your-xai-key                     # Grok
-ANTHROPIC_API_KEY=your-anthropic-key          # Claude Haiku
+# AI APIs — upgrades from local AI to LLM-powered summaries & chat
+OPENAI_API_KEY=your-key        # GPT-4o-mini (cheapest option)
+XAI_API_KEY=your-key           # Grok via xAI
+ANTHROPIC_API_KEY=your-key     # Claude Haiku
 ```
 
 ## Project Structure
@@ -117,21 +116,22 @@ supabase/
 ## How It Works
 
 1. **Update Now** calls `/api/update` which orchestrates the pipeline
-2. **News Fetch** queries NewsData.io (primary), falls back to NewsAPI.org
-3. **AI Summaries** generates 3-bullet summaries + sentiment per article
+2. **News Fetch** pulls from 20+ RSS feeds (BBC, Reuters, NYT, TechCrunch, etc.) — zero keys needed
+3. **AI Summaries** local engine extracts key sentences + analyzes sentiment (or optional LLM for richer output)
 4. **Analytics** produces aggregate trends, sentiment, topic heat, country volume
 5. **Dashboard** Zustand store updates, React re-renders cards, charts, map
 6. **Realtime** Supabase pushes changes to connected clients
 
-## Free Tier Limits
+## What's Free vs Optional
 
-| Service | Free Tier |
-|---------|-----------|
-| NewsData.io | 200 credits/day |
-| NewsAPI.org | 100 requests/day |
-| Supabase | 500MB DB, 50K auth users |
-| OpenAI | Pay-per-use (GPT-4o-mini is very cheap) |
-| Vercel | 100GB bandwidth, serverless |
+| Feature | Default (Free) | With API Key |
+|---------|----------------|-------------|
+| News Sources | 20+ RSS feeds (BBC, Reuters, NYT…) | + NewsData.io, NewsAPI.org |
+| AI Summaries | Local extractive engine | LLM-powered (GPT/Claude/Grok) |
+| Sentiment | Keyword-based analysis | LLM context-aware analysis |
+| AI Chat | Smart local responses | Full conversational AI |
+| Auth/DB | localStorage (works offline!) | Supabase (cloud persistence) |
+| Charts & Map | Full functionality | Full functionality |
 
 ## License
 

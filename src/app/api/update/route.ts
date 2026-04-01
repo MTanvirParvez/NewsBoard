@@ -1,31 +1,36 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import type { Article, AISummary, AggregateAnalytics } from "@/types";
 
-export async function POST() {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+export async function POST(req: NextRequest) {
+  // Derive base URL from the incoming request
+  const url = new URL(req.url);
+  const baseUrl = `${url.protocol}//${url.host}`;
 
   try {
-    // Step 1: Fetch news articles
-    const newsRes = await fetch(`${baseUrl}/api/news`);
-    if (!newsRes.ok) throw new Error("Failed to fetch news");
-    const { articles }: { articles: Article[] } = await newsRes.json();
+    // Step 1: Fetch news articles from RSS feeds + optional APIs
+    const newsRes = await fetch(`${baseUrl}/api/news`, {
+      headers: { "User-Agent": "LuminaBoard-Internal/1.0" },
+    });
+    if (!newsRes.ok) throw new Error(`News fetch failed: ${newsRes.status}`);
+    const newsData = await newsRes.json();
+    const articles: Article[] = newsData.articles || [];
 
-    if (!articles?.length) {
+    if (!articles.length) {
       return NextResponse.json({
         articles: [],
         summaries: {},
         analytics: null,
-        message: "No articles found. Check your API keys.",
+        message: "No articles fetched. RSS feeds may be temporarily unavailable — try again in a moment.",
       });
     }
 
-    // Step 2: Generate AI summaries
+    // Step 2: Generate summaries (local AI or API-based)
     let summaries: Record<string, AISummary> = {};
     try {
       const summaryRes = await fetch(`${baseUrl}/api/ai/summarize`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ articles: articles.slice(0, 30) }),
+        body: JSON.stringify({ articles: articles.slice(0, 50) }),
       });
       if (summaryRes.ok) {
         const data = await summaryRes.json();
@@ -55,12 +60,17 @@ export async function POST() {
       articles,
       summaries,
       analytics,
-      message: `Successfully processed ${articles.length} articles`,
+      source: newsData.source || "rss",
+      message: `Processed ${articles.length} articles from ${newsData.source || "RSS feeds"}`,
     });
   } catch (err) {
     console.error("Update pipeline error:", err);
     return NextResponse.json(
-      { error: "Update pipeline failed", details: String(err) },
+      {
+        error: "Update pipeline failed",
+        details: String(err),
+        message: "Failed to fetch news. Check your network connection and try again.",
+      },
       { status: 500 }
     );
   }
