@@ -95,10 +95,10 @@ export default function SignupPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-4">
             <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-indigo-600 flex items-center justify-center">
-              <span className="text-white font-bold text-lg">L</span>
+              <span className="text-white font-bold text-lg">N</span>
             </div>
             <span className="text-2xl font-bold">
-              Lumina<span className="text-primary">Board</span>
+              News<span className="text-primary">Board</span>
             </span>
           </Link>
         </div>

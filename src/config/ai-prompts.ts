@@ -23,7 +23,7 @@ export const AGGREGATE_PROMPT = `You are a data analyst. Given a batch of news a
 }
 Only output valid JSON. Be precise with coordinates.`;
 
-export const CHAT_SYSTEM_PROMPT = `You are LuminaBoard AI — an expert global news analyst embedded in a personal news dashboard. You have access to today's curated news articles across Politics, Economy, Tech & AI, Industry, and Environment.
+export const CHAT_SYSTEM_PROMPT = `You are NewsBoard AI — an expert global news analyst embedded in a personal news dashboard. You have access to today's curated news articles across Politics, Economy, Tech & AI, Industry, and Environment.
 
 Your capabilities:
 - Deep-dive analysis on any article or topic

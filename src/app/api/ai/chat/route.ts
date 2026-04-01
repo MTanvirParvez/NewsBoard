@@ -65,7 +65,7 @@ function generateLocalResponse(message: string, articleContext?: string): string
 
   // General knowledge responses
   if (lower.includes("help") || lower.includes("what can you")) {
-    return `I'm LuminaBoard's AI assistant! Here's what I can help with:\n\n• **Article Analysis** — Click an article, then ask me about it\n• **Trend Insights** — Ask about patterns in today's news\n• **Category Deep-Dives** — Ask about Politics, Economy, Tech, Industry, or Environment\n• **Dashboard Tips** — How to use LuminaBoard features\n\n💡 **Pro tip:** For much richer AI chat, add an API key (OpenAI/Anthropic/xAI) to your .env.local file. The local engine handles basics, but an LLM unlocks full conversational analysis.`;
+    return `I'm NewsBoard's AI assistant! Here's what I can help with:\n\n• **Article Analysis** — Click an article, then ask me about it\n• **Trend Insights** — Ask about patterns in today's news\n• **Category Deep-Dives** — Ask about Politics, Economy, Tech, Industry, or Environment\n• **Dashboard Tips** — How to use NewsBoard features\n\n💡 **Pro tip:** For much richer AI chat, add an API key (OpenAI/Anthropic/xAI) to your .env.local file. The local engine handles basics, but an LLM unlocks full conversational analysis.`;
   }
 
   if (lower.includes("trend") || lower.includes("pattern")) {
@@ -73,11 +73,11 @@ function generateLocalResponse(message: string, articleContext?: string): string
   }
 
   if (lower.includes("how") && (lower.includes("work") || lower.includes("update"))) {
-    return `Here's how LuminaBoard works:\n\n1. **Update Now** fetches news from RSS feeds (20+ sources like BBC, Reuters, NYT, TechCrunch)\n2. **Local AI** generates 3-bullet summaries + sentiment for each article\n3. **Analytics** are computed from the processed articles\n4. **Charts & Map** visualize sentiment, trends, and geographic distribution\n\nEverything runs locally — no API keys required! For enhanced AI summaries and this chat, you can optionally add an LLM API key.`;
+    return `Here's how NewsBoard works:\n\n1. **Update Now** fetches news from RSS feeds (20+ sources like BBC, Reuters, NYT, TechCrunch)\n2. **Local AI** generates 3-bullet summaries + sentiment for each article\n3. **Analytics** are computed from the processed articles\n4. **Charts & Map** visualize sentiment, trends, and geographic distribution\n\nEverything runs locally — no API keys required! For enhanced AI summaries and this chat, you can optionally add an LLM API key.`;
   }
 
   if (lower.includes("api") || lower.includes("key") || lower.includes("setup") || lower.includes("configure")) {
-    return `LuminaBoard works 100% free out of the box! Here's what each optional API key adds:\n\n• **News APIs** (optional): NewsData.io or NewsAPI.org for additional sources beyond RSS\n• **AI APIs** (optional): OpenAI (GPT-4o-mini), Anthropic (Claude Haiku), or xAI (Grok) for:\n  - Higher quality summaries with context understanding\n  - Rich conversational chat (like this)\n  - Better topic and sentiment analysis\n\nAdd keys to \`.env.local\` — see \`.env.local.example\` for the template.`;
+    return `NewsBoard works 100% free out of the box! Here's what each optional API key adds:\n\n• **News APIs** (optional): NewsData.io or NewsAPI.org for additional sources beyond RSS\n• **AI APIs** (optional): OpenAI (GPT-4o-mini), Anthropic (Claude Haiku), or xAI (Grok) for:\n  - Higher quality summaries with context understanding\n  - Rich conversational chat (like this)\n  - Better topic and sentiment analysis\n\nAdd keys to \`.env.local\` — see \`.env.local.example\` for the template.`;
   }
 
   // Default conversational response

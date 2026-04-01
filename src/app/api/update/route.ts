@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   try {
     // Step 1: Fetch news articles from RSS feeds + optional APIs
     const newsRes = await fetch(`${baseUrl}/api/news`, {
-      headers: { "User-Agent": "LuminaBoard-Internal/1.0" },
+      headers: { "User-Agent": "NewsBoard-Internal/1.0" },
     });
     if (!newsRes.ok) throw new Error(`News fetch failed: ${newsRes.status}`);
     const newsData = await newsRes.json();

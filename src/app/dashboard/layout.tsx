@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Dashboard — LuminaBoard",
+  title: "Dashboard — NewsBoard",
   description: "Your AI-powered global news intelligence dashboard",
 };
 

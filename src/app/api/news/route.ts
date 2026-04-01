@@ -8,7 +8,7 @@ import { CATEGORIES } from "@/types";
 const rssParser = new Parser({
   timeout: 10000,
   headers: {
-    "User-Agent": "LuminaBoard/1.0 (News Dashboard)",
+    "User-Agent": "NewsBoard/1.0 (News Dashboard)",
     Accept: "application/rss+xml, application/xml, text/xml",
   },
 });

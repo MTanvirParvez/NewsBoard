@@ -3,7 +3,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "LuminaBoard — AI-Powered Global News Dashboard",
+  title: "NewsBoard — AI-Powered Global News Dashboard",
   description:
     "Your personal Bloomberg-grade news intelligence dashboard. Real-time global coverage across Politics, Economy, Tech & AI, Industry, and Environment — powered by AI analysis.",
   keywords: [

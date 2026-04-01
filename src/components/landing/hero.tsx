@@ -70,7 +70,7 @@ export function Hero() {
           transition={{ duration: 0.8, delay: 0.1 }}
         >
           <span className="bg-gradient-to-r from-white via-white to-white/60 bg-clip-text text-transparent">
-            Lumina
+            News
           </span>
           <span className="bg-gradient-to-r from-primary via-indigo-400 to-primary bg-clip-text text-transparent neon-text">
             Board
@@ -84,9 +84,9 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          Your Bloomberg-grade news dashboard — powered by AI.
+          Your personal AI-powered global news intelligence dashboard.
           <br />
-          Global coverage. Instant summaries. Beautiful analytics.
+          Live coverage. Instant summaries. Beautiful analytics. Zero API keys.
         </motion.p>
 
         {/* Category pills */}

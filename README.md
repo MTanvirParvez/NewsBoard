@@ -1,4 +1,4 @@
-# LuminaBoard
+# NewsBoard
 
 **AI-Powered Global News Dashboard** — A Bloomberg-grade personal news intelligence platform.
 

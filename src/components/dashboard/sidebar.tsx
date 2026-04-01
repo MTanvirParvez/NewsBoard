@@ -54,7 +54,7 @@ export function Sidebar() {
       {/* Logo */}
       <div className="flex items-center gap-3 px-4 h-16 border-b border-border/50">
         <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-indigo-600 flex items-center justify-center shrink-0">
-          <span className="text-white font-bold text-sm">L</span>
+          <span className="text-white font-bold text-sm">N</span>
         </div>
         {!collapsed && (
           <motion.span
@@ -63,7 +63,7 @@ export function Sidebar() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            Lumina<span className="text-primary">Board</span>
+            News<span className="text-primary">Board</span>
           </motion.span>
         )}
       </div>
