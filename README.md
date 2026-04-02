@@ -1,21 +1,23 @@
 # NewsBoard
 
-**AI-Powered Global News Dashboard** — A Bloomberg-grade personal news intelligence platform.
+**AI-Powered Executive News Dashboard** — Newsletter-style briefing platform with personalized categories.
 
-Real-time global coverage across **Politics**, **Economy**, **Tech & AI**, **Industry**, and **Environment** — powered by AI analysis, beautiful glassmorphism UI, and interactive analytics.
+Your personal Bloomberg-grade intelligence dashboard. **15 categories**, **40+ RSS sources**, **executive briefings**, **daily newsletter**, all customizable per user — zero API keys needed.
 
 ## Features
 
-- **5 Global Categories** — Politics, Economy, Tech & AI, Industry, Environment
-- **AI Summaries** — 3-bullet intelligence per article with sentiment analysis
-- **Interactive Charts** — Sentiment donut, trend lines, topic radar, category bars (Recharts)
-- **World Heatmap** — React Leaflet map colored by news volume/sentiment per country
-- **AI Chat** — Deep-dive analysis assistant embedded in the dashboard
-- **One-Click Update** — "Update Now" button triggers the full news+AI pipeline
-- **Glassmorphism UI** — Frosted glass cards, neon accents, fluid Framer Motion animations
-- **Auth & Preferences** — Supabase auth with per-user settings and data isolation
-- **Realtime** — Supabase Realtime subscriptions for live dashboard updates
-- **100% Free Stack** — All APIs and tools use free tiers
+- **Executive Briefing** — KPI cards, global sentiment pulse, category digests with key insights
+- **15 News Categories** — Politics, Economy, Tech & AI, World, Science, Health, Industry, Environment, Sports, Entertainment, Crypto, Startups, Energy, Defense, Education
+- **Personalization** — Select which categories appear in your briefing
+- **Daily Newsletter** — Free email subscription with briefings at 9 AM and 6 PM
+- **AI Summaries** — Per-article bullet summaries + sentiment analysis
+- **Interactive Charts** — Sentiment donut, trend lines, topic radar, category bars
+- **World Heatmap** — Leaflet map colored by news volume/sentiment per country
+- **AI Chat** — Deep-dive analysis assistant with quick prompts
+- **3 Dashboard Views** — Briefing (executive summary), Explore (browse articles), Analytics (charts & map)
+- **News Ticker** — Live scrolling headlines with sentiment indicators
+- **Ambient Effects** — Particle canvas, glassmorphism, neon accents, toast notifications
+- **100% Free** — RSS feeds, local AI engine, no API keys required
 
 ## Tech Stack
 

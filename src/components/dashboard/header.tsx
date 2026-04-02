@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { RefreshCw, Clock, Sparkles, Rss, Activity } from "lucide-react";
+import { RefreshCw, Clock, Sparkles, Rss, Activity, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useDashboardStore } from "@/store/dashboard";
@@ -43,7 +43,7 @@ function AnimatedCounter({ value }: { value: number }) {
 }
 
 export function DashboardHeader() {
-  const { isUpdating, lastUpdated, articles, setIsUpdating } = useDashboardStore();
+  const { isUpdating, lastUpdated, articles, setIsUpdating, setShowPersonalization } = useDashboardStore();
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -133,6 +133,16 @@ export function DashboardHeader() {
               {formatDate(lastUpdated)}
             </span>
           )}
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowPersonalization(true)}
+            className="text-xs gap-1.5"
+          >
+            <Settings2 className="h-3.5 w-3.5" />
+            Personalize
+          </Button>
 
           {/* Update Now Button */}
           <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>

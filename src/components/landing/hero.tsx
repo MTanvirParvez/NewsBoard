@@ -1,24 +1,28 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, Globe, Cpu, TrendingUp, Zap, Shield } from "lucide-react";
+import { ArrowRight, Globe, Cpu, TrendingUp, Zap, Shield, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 const features = [
-  { icon: Globe, label: "Global Coverage", desc: "5 critical categories worldwide" },
-  { icon: Cpu, label: "AI Summaries", desc: "3-bullet intelligence per article" },
+  { icon: Globe, label: "15+ Categories", desc: "Politics to Crypto, fully customizable" },
+  { icon: Cpu, label: "AI Summaries", desc: "Executive briefing per category" },
   { icon: TrendingUp, label: "Live Analytics", desc: "Sentiment, trends & heatmaps" },
-  { icon: Zap, label: "One-Click Refresh", desc: "Instant news pipeline update" },
-  { icon: Shield, label: "100% Free Stack", desc: "No paid APIs required" },
+  { icon: Mail, label: "Daily Newsletter", desc: "Free 9 AM & 6 PM briefings" },
+  { icon: Shield, label: "100% Free", desc: "No API keys required" },
 ];
 
 const categories = [
   { name: "Politics", color: "from-orange-500 to-orange-600" },
   { name: "Economy", color: "from-emerald-500 to-emerald-600" },
   { name: "Tech & AI", color: "from-indigo-500 to-indigo-600" },
-  { name: "Industry", color: "from-yellow-500 to-yellow-600" },
-  { name: "Environment", color: "from-teal-500 to-teal-600" },
+  { name: "World", color: "from-blue-500 to-blue-600" },
+  { name: "Science", color: "from-purple-500 to-purple-600" },
+  { name: "Health", color: "from-pink-500 to-pink-600" },
+  { name: "Startups", color: "from-cyan-500 to-cyan-600" },
+  { name: "Crypto", color: "from-amber-500 to-amber-600" },
+  { name: "+7 more", color: "from-slate-500 to-slate-600" },
 ];
 
 export function Hero() {

@@ -6,6 +6,7 @@
  */
 
 import type { AISummary, Article, AggregateAnalytics, Category } from "@/types";
+import { CATEGORIES } from "@/types";
 
 // ─── Sentiment Lexicon ────────────────────────────────────────
 
@@ -251,7 +252,7 @@ export function generateAnalytics(
   articles: Article[],
   summaries: Record<string, AISummary>
 ): AggregateAnalytics {
-  const categories: Category[] = ["politics", "economy", "tech_ai", "industry", "environment"];
+  const categories = CATEGORIES;
 
   // ─── Sentiment per category ─────────────
   const sentiment = categories.map((cat) => {
